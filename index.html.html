@@ -1,0 +1,2060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Ranking System — Classes 6A &amp; 6C</title>
+<style>
+  :root{
+    --accent:#6366f1;
+    --accent2:#8b5cf6;
+    --border:#e2e8f0;
+    --muted:#64748b;
+    --text:#0f172a;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    background:
+      radial-gradient(1100px 520px at 8% -12%, #e0e7ff 0%, transparent 55%),
+      radial-gradient(900px 500px at 100% 0%, #ede9fe 0%, transparent 50%),
+      #f1f5f9;
+    color:var(--text);
+    font-size:14px;
+    overflow:hidden;
+  }
+  .app{
+    height:100%;max-width:1700px;margin:0 auto;padding:14px 18px;
+    display:flex;flex-direction:column;gap:10px;
+  }
+
+  /* ---------- Header ---------- */
+  .app-header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{
+    width:46px;height:46px;border-radius:14px;display:grid;place-items:center;
+    font-size:22px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+    box-shadow:0 8px 20px rgba(99,102,241,.35);
+  }
+  .brand h1{margin:0;font-size:19px;letter-spacing:-.3px}
+  .brand p{margin:3px 0 0;font-size:12px;color:var(--muted)}
+  .header-actions{display:flex;gap:8px;align-items:center}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    border:1px solid var(--border);background:#fff;padding:9px 15px;border-radius:10px;
+    font:inherit;font-weight:600;color:#334155;cursor:pointer;transition:.15s;
+    white-space:nowrap;display:inline-flex;align-items:center;gap:7px;
+  }
+  .btn:hover{background:#f8fafc;border-color:#cbd5e1;transform:translateY(-1px)}
+  .btn:active{transform:translateY(0)}
+  .btn.primary{
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    border-color:transparent;color:#fff;box-shadow:0 5px 14px rgba(99,102,241,.35);
+  }
+  .btn.primary:hover{filter:brightness(1.08)}
+  .btn.ghost{background:transparent}
+  .btn.danger{color:#ef4444;border-color:#fecaca}
+  .btn.danger:hover{background:#fef2f2;border-color:#fca5a5}
+
+  .icon-btn{
+    border:0;background:transparent;color:#94a3b8;cursor:pointer;
+    border-radius:6px;width:24px;height:24px;display:grid;place-items:center;
+    font-size:12px;line-height:1;transition:.15s;flex:0 0 auto;
+  }
+  .icon-btn:hover{background:#fee2e2;color:#ef4444}
+  .icon-btn.diag:hover{background:#e0e7ff;color:#4f46e5}
+  .icon-btn.export:hover{background:#d1fae5;color:#059669}
+
+  /* ---------- Export dropdown ---------- */
+  .export-wrap{position:relative}
+  .export-menu{
+    position:absolute;top:calc(100% + 8px);right:0;background:#fff;
+    border:1px solid var(--border);border-radius:13px;padding:7px;
+    box-shadow:0 18px 45px rgba(15,23,42,.18);min-width:250px;z-index:200;
+    display:none;
+  }
+  .export-menu.open{display:block;animation:pop .14s ease-out}
+  @keyframes pop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+  .export-menu .menu-label{
+    font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;
+    color:#94a3b8;padding:7px 10px 4px;
+  }
+  .export-menu button{
+    display:flex;align-items:center;gap:11px;width:100%;border:0;
+    background:transparent;padding:9px 11px;border-radius:9px;font:inherit;
+    font-weight:600;color:#334155;cursor:pointer;text-align:left;font-size:13px;
+    transition:.12s;
+  }
+  .export-menu button:hover{background:#eef2ff;color:#4338ca}
+  .export-menu .mi{font-size:15px;width:20px;text-align:center;flex:0 0 auto}
+  .export-menu .sep{height:1px;background:var(--border);margin:5px 4px}
+  .export-menu .hint{font-size:11px;color:#94a3b8;font-weight:500;padding:2px 11px 6px}
+
+  /* ---------- Tabs ---------- */
+  .tabs{
+    display:flex;gap:6px;flex-wrap:wrap;background:#fff;padding:6px;
+    border-radius:12px;border:1px solid var(--border);
+    box-shadow:0 1px 2px rgba(15,23,42,.05);width:fit-content;
+  }
+  .tab{
+    border:0;background:transparent;padding:8px 16px;border-radius:8px;
+    font:inherit;font-weight:600;color:#475569;cursor:pointer;transition:.15s;
+  }
+  .tab:hover{background:#f1f5f9;color:var(--text)}
+  .tab.active{
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff;box-shadow:0 5px 12px rgba(99,102,241,.32);
+  }
+  .tab.add{color:#4f46e5;border:1px dashed #c7d2fe}
+  .tab.add:hover{background:#eef2ff}
+
+  /* ---------- Toolbar ---------- */
+  .toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .search{position:relative;flex:0 1 260px;min-width:180px}
+  .search input{
+    width:100%;padding:10px 14px 10px 36px;border-radius:10px;border:1px solid var(--border);
+    background:#fff;font:inherit;color:var(--text);transition:.15s;
+  }
+  .search input:focus{
+    outline:none;border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(99,102,241,.15);
+  }
+  .search::before{
+    content:"🔍";position:absolute;left:12px;top:50%;transform:translateY(-50%);
+    font-size:13px;opacity:.55;pointer-events:none;
+  }
+  .switch{
+    display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);
+    padding:9px 13px;border-radius:10px;cursor:pointer;font-size:13px;
+    color:#475569;font-weight:600;user-select:none;transition:.15s;
+  }
+  .switch:hover{border-color:#cbd5e1}
+  .switch input{accent-color:var(--accent);width:16px;height:16px;cursor:pointer}
+  .spacer{flex:1 1 auto}
+
+  /* ---------- Summary cards ---------- */
+  .summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+  .stat{
+    background:#fff;border:1px solid var(--border);border-radius:12px;
+    padding:11px 14px;display:flex;align-items:center;gap:11px;
+    box-shadow:0 1px 2px rgba(15,23,42,.04);
+    position:relative;overflow:hidden;transition:transform .15s, box-shadow .15s;
+  }
+  .stat:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(15,23,42,.08)}
+  .stat-icon{
+    width:38px;height:38px;border-radius:11px;display:grid;place-items:center;
+    font-size:18px;flex:0 0 auto;
+  }
+  .stat-body{display:flex;flex-direction:column;gap:1px;min-width:0}
+  .stat-label{
+    font-size:10.5px;text-transform:uppercase;letter-spacing:.7px;
+    color:#94a3b8;font-weight:800;
+  }
+  .stat-value{font-size:17px;font-weight:800;color:#1e293b;letter-spacing:-.2px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .stat.s-indigo .stat-icon{background:#e0e7ff;color:#4f46e5}
+  .stat.s-emerald .stat-icon{background:#d1fae5;color:#059669}
+  .stat.s-violet .stat-icon{background:#ede9fe;color:#7c3aed}
+  .stat.s-amber .stat-icon{background:#fef3c7;color:#d97706}
+
+  /* ---------- Podium / Stage ---------- */
+  .stage{
+    background:linear-gradient(180deg,#ffffff 0%,#fafbff 55%,#eef2ff 100%);
+    border:1px solid var(--border);border-radius:16px;padding:14px 16px 0;
+    position:relative;overflow:hidden;box-shadow:0 2px 8px rgba(15,23,42,.05);
+  }
+  .stage::after{
+    content:'';position:absolute;bottom:0;left:0;right:0;height:80px;
+    background:radial-gradient(ellipse at center bottom, rgba(139,92,246,.18), transparent 70%);
+    pointer-events:none;
+  }
+  .stage-header{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:6px;position:relative;z-index:2;
+  }
+  .stage-title{font-size:14px;font-weight:800;color:#475569;letter-spacing:.3px}
+  .stage-sub{
+    font-size:11px;font-weight:700;color:#6366f1;
+    background:#eef2ff;padding:3px 10px;border-radius:999px;
+  }
+  .stage-empty{text-align:center;color:#94a3b8;font-weight:600;padding:40px 10px}
+  .podium{
+    display:flex;align-items:flex-end;justify-content:center;
+    gap:18px;min-height:250px;position:relative;z-index:1;
+  }
+  .podium-spot{
+    flex:0 1 160px;display:flex;flex-direction:column;align-items:center;gap:5px;
+    min-width:0;cursor:pointer;
+  }
+  .podium-crown{height:22px;font-size:18px;line-height:1;display:grid;place-items:center}
+  .podium-avatar{
+    width:54px;height:54px;border-radius:50%;display:grid;place-items:center;
+    font-size:22px;font-weight:800;color:#fff;border:3px solid #fff;
+    box-shadow:0 6px 16px rgba(15,23,42,.18);transition:transform .25s;
+  }
+  .podium-spot:hover .podium-avatar{transform:scale(1.08) translateY(-2px)}
+  .spot-1 .podium-avatar{background:linear-gradient(135deg,#fbbf24,#f59e0b)}
+  .spot-2 .podium-avatar{background:linear-gradient(135deg,#cbd5e1,#94a3b8)}
+  .spot-3 .podium-avatar{background:linear-gradient(135deg,#d97706,#92400e)}
+  .podium-name{
+    font-weight:800;font-size:13px;text-align:center;max-width:100%;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1e293b;
+  }
+  .podium-score{
+    font-weight:800;font-size:12px;color:#4f46e5;
+    background:#eef2ff;padding:2px 9px;border-radius:999px;
+  }
+  .podium-bar{
+    width:100%;border-radius:12px 12px 0 0;
+    display:flex;align-items:flex-start;justify-content:center;
+    padding-top:12px;position:relative;
+    animation:rise .75s cubic-bezier(.2,.9,.3,1.25) both;
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.45), 0 -4px 14px rgba(15,23,42,.08);
+  }
+  @keyframes rise{from{transform:scaleY(0);transform-origin:bottom}to{transform:scaleY(1);transform-origin:bottom}}
+  .spot-1 .podium-bar{height:130px;background:linear-gradient(180deg,#fcd34d,#f59e0b 70%,#d97706)}
+  .spot-2 .podium-bar{height:95px;background:linear-gradient(180deg,#e2e8f0,#94a3b8 70%,#64748b)}
+  .spot-3 .podium-bar{height:70px;background:linear-gradient(180deg,#f59e0b,#b45309 70%,#92400e)}
+  .podium-rank{
+    font-size:26px;font-weight:900;color:#fff;
+    text-shadow:0 2px 8px rgba(0,0,0,.28);letter-spacing:-1px;
+  }
+  .podium-empty{opacity:.35}
+  .podium-empty .podium-avatar{background:#cbd5e1 !important}
+  .podium-empty .podium-bar{background:linear-gradient(180deg,#e2e8f0,#cbd5e1) !important}
+
+  /* ---------- Table ---------- */
+  .table-wrap{
+    flex:1;min-height:0;overflow:auto;background:#fff;border:1px solid var(--border);
+    border-radius:14px;box-shadow:0 2px 8px rgba(15,23,42,.06);
+  }
+  table{border-collapse:separate;border-spacing:0;width:100%;font-size:13px}
+  thead th{
+    position:sticky;top:0;z-index:5;background:#f8fafc;
+    border-bottom:2px solid var(--border);
+    padding:8px 6px;font-weight:700;color:#64748b;font-size:12px;
+    white-space:nowrap;vertical-align:top;text-align:center;
+  }
+  th.col-rank,td.col-rank{
+    position:sticky;left:0;z-index:3;width:58px;min-width:58px;text-align:center;
+  }
+  th.col-name,td.col-name{
+    position:sticky;left:58px;z-index:3;width:172px;min-width:172px;
+    box-shadow:3px 0 0 0 #eef2f7;text-align:left;
+  }
+  thead th.col-rank,thead th.col-name{z-index:8}
+  tbody td{
+    background:#fff;border-bottom:1px solid #f1f5f9;
+    padding:4px 6px;text-align:center;color:#334155;transition:background .15s;
+  }
+  tbody tr:nth-child(even) td{background:#fafbff}
+  tbody tr:hover td{background:#eef2ff}
+  tbody tr:last-child td{border-bottom:0}
+  .th-row{display:flex;align-items:center;gap:4px;justify-content:center}
+  .th-name{
+    width:80px;border:1px solid transparent;background:transparent;border-radius:6px;
+    padding:3px 5px;font:inherit;font-weight:700;font-size:12px;color:#334155;
+    text-align:center;transition:.15s;
+  }
+  .th-name:hover{border-color:#cbd5e1;background:#fff}
+  .th-name:focus{outline:none;border-color:var(--accent);background:#fff;
+    box-shadow:0 0 0 3px rgba(99,102,241,.14)}
+  .th-sub{font-size:10.5px;color:#94a3b8;font-weight:700;gap:5px;margin-top:3px}
+  .th-max{
+    width:42px;border:1px solid #e2e8f0;background:#fff;border-radius:6px;
+    padding:2px 4px;font:inherit;font-size:11px;text-align:center;color:#475569;
+  }
+  .th-max:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(99,102,241,.14)}
+  .th-chk{display:flex;align-items:center;cursor:pointer}
+  .th-chk input{accent-color:var(--accent);width:13px;height:13px;cursor:pointer}
+  .cell-input{
+    width:100%;border:1px solid transparent;background:transparent;border-radius:7px;
+    padding:6px 4px;text-align:center;font:inherit;color:inherit;transition:.15s;
+  }
+  .cell-input:hover{border-color:#cbd5e1;background:#fff}
+  .cell-input:focus{
+    outline:none;border-color:var(--accent);background:#fff;
+    box-shadow:0 0 0 3px rgba(99,102,241,.15);
+  }
+  .name-input{text-align:left;font-weight:600;padding-left:8px}
+  .name-input.link{cursor:pointer;color:#4f46e5}
+  .name-input.link:hover{text-decoration:underline}
+  .cell-select{
+    width:100%;border:1px solid transparent;background:transparent;border-radius:7px;
+    padding:6px 4px;font:inherit;color:inherit;text-align:center;text-align-last:center;
+    cursor:pointer;transition:.15s;
+  }
+  .cell-select:hover{border-color:#cbd5e1;background:#fff}
+  .cell-select:focus{outline:none;border-color:var(--accent);background:#fff}
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  input[type=number]{-moz-appearance:textfield}
+  .score-input.s-high{color:#059669;font-weight:700}
+  .score-input.s-mid{color:#d97706;font-weight:700}
+  .score-input.s-low{color:#dc2626;font-weight:700}
+  .derived{font-weight:700;color:#475569;white-space:nowrap}
+  .cell-quiztotal{color:#0f766e}
+  .cell-bonustotal{color:#0891b2}
+  .cell-finalscore{color:#7c3aed;font-weight:800}
+  .inactive{opacity:.38}
+  .pct-wrap{display:flex;flex-direction:column;gap:3px;align-items:center;min-width:62px;padding:0 2px}
+  .pct-bar{width:100%;height:5px;background:#e2e8f0;border-radius:5px;overflow:hidden}
+  .pct-fill{
+    height:100%;border-radius:5px;transition:width .35s cubic-bezier(.4,0,.2,1);
+    background:linear-gradient(90deg,#6366f1,#8b5cf6);
+  }
+  .pct-fill.quiz{background:linear-gradient(90deg,#14b8a6,#0ea5e9)}
+  .pct-label{font-weight:800;font-size:11.5px;color:#4f46e5}
+  .cell-quizpct .pct-label{color:#0f766e}
+  .rank-badge{
+    display:inline-grid;place-items:center;width:30px;height:30px;border-radius:9px;
+    font-weight:800;font-size:12px;background:#f1f5f9;color:#475569;
+    transition:transform .25s, box-shadow .25s;
+  }
+  .rank-badge.gold{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;
+    box-shadow:0 4px 12px rgba(245,158,11,.5)}
+  .rank-badge.silver{background:linear-gradient(135deg,#cbd5e1,#94a3b8);color:#fff;
+    box-shadow:0 4px 12px rgba(148,163,184,.5)}
+  .rank-badge.bronze{background:linear-gradient(135deg,#d97706,#92400e);color:#fff;
+    box-shadow:0 4px 12px rgba(180,83,9,.45)}
+  .grade-badge{
+    display:inline-grid;place-items:center;min-width:34px;height:24px;padding:0 8px;
+    border-radius:7px;font-weight:800;font-size:11.5px;letter-spacing:.3px;
+  }
+  .g-a-plus{background:#d1fae5;color:#047857}
+  .g-a{background:#dbeafe;color:#1d4ed8}
+  .g-b{background:#e0e7ff;color:#4338ca}
+  .g-c{background:#fef3c7;color:#b45309}
+  .g-d{background:#ffedd5;color:#c2410c}
+  .g-f{background:#fee2e2;color:#b91c1c}
+  .bonus-off .col-bonus,
+  .bonus-off .col-bonus-total,
+  .bonus-off .col-final,
+  .bonus-off .col-finalpct,
+  .bonus-off .col-grade{opacity:.45}
+  .col-actions{width:62px;min-width:62px}
+  .col-actions .icon-btn{display:inline-grid}
+  .empty{padding:60px 20px;text-align:center;color:#94a3b8;font-weight:600}
+
+  /* ---------- Modals (shared) ---------- */
+  dialog{border:0;padding:0;box-shadow:0 26px 70px rgba(15,23,42,.35)}
+  dialog::backdrop{background:rgba(15,23,42,.45);backdrop-filter:blur(3px)}
+  dialog#modal{border-radius:16px;width:min(430px,92vw)}
+  #modalForm{padding:22px;display:flex;flex-direction:column;gap:14px;margin:0}
+  #modalForm h3{margin:0;font-size:17px;letter-spacing:-.2px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field span{font-size:12px;font-weight:700;color:var(--muted)}
+  .field input,.field select{
+    padding:10px 12px;border:1px solid var(--border);border-radius:10px;
+    font:inherit;background:#f8fafc;color:var(--text);transition:.15s;
+  }
+  .field input:focus,.field select:focus{
+    outline:none;border-color:var(--accent);background:#fff;
+    box-shadow:0 0 0 3px rgba(99,102,241,.15);
+  }
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:2px}
+
+  /* ---------- Diagnostics modal ---------- */
+  dialog#diagModal{
+    border-radius:20px;width:min(760px,95vw);max-height:92vh;overflow:hidden;
+  }
+  .diag-inner{display:flex;flex-direction:column;max-height:92vh}
+
+  .diag-head{
+    padding:18px 22px;background:linear-gradient(135deg,#6366f1,#8b5cf6);
+    color:#fff;display:flex;align-items:center;gap:15px;position:relative;
+  }
+  .diag-avatar{
+    width:58px;height:58px;border-radius:50%;display:grid;place-items:center;
+    font-size:24px;font-weight:800;background:rgba(255,255,255,.22);
+    border:3px solid rgba(255,255,255,.45);flex:0 0 auto;
+  }
+  .diag-head-info{flex:1;min-width:0}
+  .diag-head-info h2{margin:0;font-size:19px;letter-spacing:-.3px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .diag-head-info p{margin:4px 0 0;font-size:12.5px;opacity:.92;font-weight:600}
+  .diag-head-info .dot{opacity:.6;margin:0 6px}
+  .diag-close{
+    border:0;background:rgba(255,255,255,.18);color:#fff;border-radius:10px;
+    width:34px;height:34px;font-size:15px;cursor:pointer;flex:0 0 auto;
+    transition:.15s;display:grid;place-items:center;
+  }
+  .diag-close:hover{background:rgba(255,255,255,.32)}
+
+  .diag-body{padding:18px 22px 4px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:16px}
+  .diag-body::-webkit-scrollbar{width:9px}
+  .diag-body::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:8px;border:2px solid #fff}
+
+  .diag-section-title{
+    font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.9px;
+    color:#94a3b8;display:flex;align-items:center;gap:7px;margin-bottom:-4px;
+  }
+
+  /* Key stats grid */
+  .diag-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:9px}
+  .diag-stat{
+    background:#f8fafc;border:1px solid var(--border);border-radius:11px;
+    padding:10px 12px;display:flex;flex-direction:column;gap:2px;
+  }
+  .diag-stat .k{font-size:10px;font-weight:800;color:#94a3b8;
+    text-transform:uppercase;letter-spacing:.6px}
+  .diag-stat .v{font-size:16px;font-weight:800;color:#1e293b}
+  .diag-stat .v.indigo{color:#4f46e5}
+  .diag-stat .v.emerald{color:#059669}
+  .diag-stat .v.violet{color:#7c3aed}
+  .diag-stat .v.amber{color:#d97706}
+  .diag-stat .v.rose{color:#e11d48}
+
+  /* Quiz comparison rows */
+  .diag-quiz-list{display:flex;flex-direction:column;gap:2px}
+  .diag-quiz-row{
+    display:grid;grid-template-columns:92px 1fr 58px;gap:11px;align-items:center;
+    padding:7px 0;border-bottom:1px solid #f1f5f9;
+  }
+  .diag-quiz-row:last-child{border-bottom:0}
+  .diag-q-name{font-weight:700;font-size:12.5px;color:#334155;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .diag-q-name small{display:block;font-weight:600;color:#94a3b8;font-size:10.5px}
+  .diag-bars{display:flex;flex-direction:column;gap:4px}
+  .diag-bar-line{display:flex;align-items:center;gap:7px}
+  .diag-bar-tag{
+    font-size:9.5px;font-weight:800;color:#94a3b8;width:36px;
+    text-transform:uppercase;letter-spacing:.4px;flex:0 0 auto;
+  }
+  .diag-bar-track{flex:1;height:9px;background:#f1f5f9;border-radius:6px;overflow:hidden}
+  .diag-bar-fill{height:100%;border-radius:6px;transition:width .5s ease-out}
+  .diag-bar-fill.mine{background:linear-gradient(90deg,#6366f1,#8b5cf6)}
+  .diag-bar-fill.class{background:#cbd5e1}
+  .diag-bar-val{
+    font-size:10.5px;font-weight:800;color:#475569;width:34px;
+    text-align:right;flex:0 0 auto;
+  }
+  .diag-diff{
+    text-align:center;font-weight:800;font-size:12px;padding:4px 6px;
+    border-radius:8px;white-space:nowrap;
+  }
+  .diag-diff.pos{background:#d1fae5;color:#047857}
+  .diag-diff.neg{background:#fee2e2;color:#b91c1c}
+  .diag-diff.neu{background:#f1f5f9;color:#64748b}
+
+  /* Bonus chips */
+  .bonus-chips{display:flex;flex-wrap:wrap;gap:8px}
+  .bonus-chip{
+    background:#f8fafc;border:1px solid var(--border);border-radius:10px;
+    padding:8px 13px;display:flex;flex-direction:column;gap:1px;min-width:100px;
+  }
+  .bonus-chip .bk{font-size:10px;font-weight:800;color:#94a3b8;
+    text-transform:uppercase;letter-spacing:.5px}
+  .bonus-chip .bv{font-size:14px;font-weight:800;color:#0891b2}
+
+  /* Insights list */
+  .insights{display:flex;flex-direction:column;gap:8px}
+  .insight{
+    display:flex;align-items:flex-start;gap:11px;padding:10px 13px;
+    border-radius:11px;font-size:13px;font-weight:600;line-height:1.45;
+  }
+  .insight .ico{font-size:16px;flex:0 0 auto;line-height:1.3}
+  .insight.good{background:#ecfdf5;color:#065f46}
+  .insight.warn{background:#fffbeb;color:#92400e}
+  .insight.bad{background:#fef2f2;color:#991b1b}
+  .insight.info{background:#eff6ff;color:#1e40af}
+  .insight.trend-up{background:#ecfdf5;color:#065f46}
+  .insight.trend-down{background:#fef2f2;color:#991b1b}
+  .insight.trend-flat{background:#f1f5f9;color:#475569}
+
+  .diag-foot{
+    padding:14px 22px;border-top:1px solid var(--border);background:#fafbff;
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+    flex-wrap:wrap;
+  }
+  .diag-foot .meta{font-size:11.5px;color:#94a3b8;font-weight:600}
+  .diag-foot .btns{display:flex;gap:8px}
+
+  /* ---------- Scrollbars ---------- */
+  .table-wrap::-webkit-scrollbar{width:11px;height:11px}
+  .table-wrap::-webkit-scrollbar-track{background:#f8fafc}
+  .table-wrap::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:8px;border:3px solid #f8fafc}
+  .table-wrap::-webkit-scrollbar-thumb:hover{background:#94a3b8}
+
+  @media (max-width:820px){
+    .podium{gap:10px}
+    .podium-spot{flex:0 1 120px}
+    .spot-1 .podium-bar{height:105px}
+    .spot-2 .podium-bar{height:78px}
+    .spot-3 .podium-bar{height:58px}
+    .podium-avatar{width:44px;height:44px;font-size:18px}
+  }
+  @media (max-width:700px){
+    .app{padding:10px}
+    .brand h1{font-size:16px}
+    .brand p{display:none}
+    .diag-quiz-row{grid-template-columns:70px 1fr 50px;gap:7px}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="app-header">
+    <div class="brand">
+      <div class="logo">🏆</div>
+      <div>
+        <h1>Student Ranking System</h1>
+        <p>Quiz grades · bonus marks · live rankings · diagnostics</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="export-wrap">
+        <button class="btn ghost" id="btnExportMenu">⬇ Export <span style="font-size:10px">▾</span></button>
+        <div class="export-menu" id="exportMenu">
+          <div class="menu-label">Excel / CSV exports</div>
+          <button data-export="complete"><span class="mi">📦</span> Complete Workbook (.xls)</button>
+          <button data-export="rankings"><span class="mi">🏆</span> Rankings Table (.xls)</button>
+          <button data-export="diagnostics"><span class="mi">📊</span> Diagnostics — All Students (.xls)</button>
+          <button data-export="summary"><span class="mi">📈</span> Class Summary &amp; Stats (.xls)</button>
+          <button data-export="podium"><span class="mi">🥇</span> Top Performers (.xls)</button>
+          <div class="sep"></div>
+          <button data-export="csv"><span class="mi">📄</span> Rankings (.csv)</button>
+          <div class="hint">.xls files contain multiple sheets — open in Excel.</div>
+        </div>
+      </div>
+      <button class="btn ghost danger" id="btnReset">↺ Reset</button>
+    </div>
+  </header>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div class="toolbar">
+    <div class="search">
+      <input id="search" type="search" placeholder="Search student…" autocomplete="off">
+    </div>
+    <label class="switch">
+      <input type="checkbox" id="includeBonus" checked>
+      <span>Count bonus in ranking</span>
+    </label>
+    <div class="spacer"></div>
+    <button class="btn primary" id="btnAddStudent">+ Student</button>
+    <button class="btn" id="btnAddQuiz">+ Quiz</button>
+  </div>
+
+  <div class="summary" id="summary"></div>
+
+  <div class="stage" id="stage"></div>
+
+  <div class="table-wrap">
+    <table id="table">
+      <thead id="thead"></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Add / Edit modal -->
+<dialog id="modal">
+  <form id="modalForm">
+    <h3 id="modalTitle">Title</h3>
+    <div id="modalBody"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn ghost" id="modalCancel">Cancel</button>
+      <button type="submit" class="btn primary">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Diagnostics modal -->
+<dialog id="diagModal">
+  <div class="diag-inner">
+    <div class="diag-head" id="diagHead"></div>
+    <div class="diag-body" id="diagBody"></div>
+    <div class="diag-foot" id="diagFoot"></div>
+  </div>
+</dialog>
+
+<script>
+/* =========================================================
+   HELPERS
+   ========================================================= */
+const $ = sel => document.querySelector(sel);
+const uid = () => Math.random().toString(36).slice(2, 9);
+
+function esc(str){
+  return String(str ?? '').replace(/[&<>"']/g, c => (
+    { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]
+  ));
+}
+function fmt(n){
+  const v = Math.round((Number(n) || 0) * 100) / 100;
+  return v.toString();
+}
+function rankClass(r){
+  return r === 1 ? 'gold' : r === 2 ? 'silver' : r === 3 ? 'bronze' : '';
+}
+function gradeOf(pct){
+  if(pct >= 95) return { letter:'A+', cls:'g-a-plus' };
+  if(pct >= 90) return { letter:'A',  cls:'g-a' };
+  if(pct >= 80) return { letter:'B',  cls:'g-b' };
+  if(pct >= 70) return { letter:'C',  cls:'g-c' };
+  if(pct >= 60) return { letter:'D',  cls:'g-d' };
+  return { letter:'F', cls:'g-f' };
+}
+function scoreClass(v, max){
+  if(v == null || !max) return '';
+  const p = (Number(v) / Number(max)) * 100;
+  if(p >= 80) return 's-high';
+  if(p >= 50) return 's-mid';
+  return 's-low';
+}
+
+/* =========================================================
+   INITIAL DATA
+   ========================================================= */
+const QUIZ_DEFS = [
+  { id:'q1', name:'Quiz 1', max:10 },
+  { id:'q2', name:'Quiz 2', max:15 },
+  { id:'q3', name:'Quiz 3', max:10 },
+  { id:'q4', name:'Quiz 4', max:10 },
+];
+const BONUS_DEFS = [
+  { key:'behaviour', name:'Behaviour',  max:5 },
+  { key:'homework',  name:'Homework',   max:5 },
+  { key:'challenge', name:'Challenge',  max:5 },
+];
+const RAW = {
+  '6A': [
+    ['Seleem',          8, 13,  8,  8],
+    ['Ahmed Taha',      7, 12,  6,  6],
+    ['Abdarhman Edris', 6,  5,  4, null],
+    ['Omar',            6, 10,  7,  9],
+    ['Adam Ahmed',      6, 13,  9,  6],
+    ['Gebril',          6, 11,  9,  7],
+    ['Hala',            5,  7,  4,  2],
+    ['Layla',           5,  8,  4,  8],
+    ['Khalid',          4, 12, null, 9],
+    ['Yassin',          4, 11,  6,  5],
+    ['Ibrahim',         4,  8,  3,  6],
+    ['Alia',            4, 10,  6,  5],
+    ['Mostafa',         3,  8,  4,  4],
+    ['Talia',           3, 12,  5,  7],
+    ['Lara',            3,  8,  8,  7],
+    ['Zeyad',           3,  8,  5,  1],
+    ['Melisa',          3, 11,  8,  6],
+    ['Mira',            2,  7,  4,  3],
+    ['Retal',           1,  4, null, 3],
+    ['Muhamed Edris',   1,  7,  2, null],
+  ],
+  '6C': [
+    ['Yamen',          10, 14, null, 10],
+    ['Nadine',         10, 11,  9,  5],
+    ['Mohamed Ayman',   9, 13,  9,  8],
+    ['Mohamed Ehab',    9, 14, 10,  9],
+    ['Hamza Ahmed',     9, 12,  7,  9],
+    ['Haya',            9, 10,  4,  5],
+    ['Mousa',           8, 11, 10,  8],
+    ['Hamza Moh.',      8, 10,  6,  6],
+    ['Tala Ezz',        6, 13,  7, 10],
+    ['Yassin',          5,  9,  6,  5],
+    ['Younis',          4, 10,  5, null],
+    ['Abobakr',         4, 10,  6,  8],
+    ['Abdallah',        4,  4,  2,  1],
+    ['Hashem',          4, 11,  9,  7],
+    ['Asia',            4,  9,  5,  7],
+    ['Talia',           3,  3, null, 1],
+    ['Mustafa',         2,  6,  5,  1],
+    ['Judy',            1, 10,  7,  5],
+    ['Karma',           1,  2,  3,  7],
+    ['Ali',             0,  2,  0,  2],
+    ['Raween',       null, null, null, 1],
+  ]
+};
+function buildDefaultState(){
+  const students = [];
+  Object.keys(RAW).forEach(cls => {
+    RAW[cls].forEach(([name, ...sc]) => {
+      students.push({
+        id: uid(), name, className: cls,
+        scores: { q1: sc[0], q2: sc[1], q3: sc[2], q4: sc[3] },
+        bonus:  { behaviour:0, homework:0, challenge:0 }
+      });
+    });
+  });
+  return {
+    quizzes: QUIZ_DEFS.map(q => ({ ...q, active:true })),
+    bonusCats: BONUS_DEFS.map(b => ({ ...b })),
+    classes: Object.keys(RAW),
+    students,
+    view: 'all',
+    search: '',
+    includeBonus: true
+  };
+}
+
+/* =========================================================
+   STATE + PERSISTENCE
+   ========================================================= */
+const STORAGE_KEY = 'studentRanker.v3';
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY) ||
+                localStorage.getItem('studentRanker.v2') ||
+                localStorage.getItem('studentRanker.v1');
+    if(!raw) return null;
+    const d = JSON.parse(raw);
+    if(!d || !Array.isArray(d.students) || !Array.isArray(d.quizzes)) return null;
+    d.bonusCats = d.bonusCats || BONUS_DEFS.map(b => ({ ...b }));
+    d.classes = d.classes || ['6A','6C'];
+    d.view = d.view || 'all';
+    d.search = '';
+    if(typeof d.includeBonus !== 'boolean') d.includeBonus = true;
+    d.quizzes.forEach(q => { if(typeof q.active !== 'boolean') q.active = true; });
+    return d;
+  }catch(e){ return null; }
+}
+function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+}
+let state = loadState() || buildDefaultState();
+
+/* =========================================================
+   COMPUTATION
+   ========================================================= */
+function stats(s){
+  let total = 0, max = 0;
+  state.quizzes.forEach(q => {
+    if(q.active === false) return;
+    max += Number(q.max) || 0;
+    const v = s.scores ? s.scores[q.id] : null;
+    if(typeof v === 'number' && !isNaN(v)) total += v;
+  });
+  let bonus = 0, bonusMax = 0;
+  state.bonusCats.forEach(b => {
+    bonusMax += Number(b.max) || 0;
+    const v = s.bonus ? s.bonus[b.key] : 0;
+    bonus += Number(v) || 0;
+  });
+  const effBonus   = state.includeBonus ? bonus : 0;
+  const finalScore = total + effBonus;
+  const quizPct    = max > 0 ? (total / max) * 100 : 0;
+  const finalPct   = max > 0 ? (finalScore / max) * 100 : 0;
+  return { total, max, quizPct, bonus, bonusMax, finalScore, finalPct };
+}
+function getVisibleStudents(){
+  let list = state.students.slice();
+  if(state.view !== 'all') list = list.filter(s => s.className === state.view);
+  const q = state.search.trim().toLowerCase();
+  if(q) list = list.filter(s => s.name.toLowerCase().includes(q));
+  return list;
+}
+function getFilteredSorted(){
+  const list = getVisibleStudents();
+  list.sort((a, b) => {
+    const sa = stats(a), sb = stats(b);
+    if(sb.finalPct !== sa.finalPct) return sb.finalPct - sa.finalPct;
+    if(sb.total    !== sa.total)    return sb.total    - sa.total;
+    return a.name.localeCompare(b.name);
+  });
+  return list;
+}
+function assignRanks(sortedList){
+  const ranks = new Map();
+  let rank = 0, prevKey = null;
+  sortedList.forEach((s, i) => {
+    const key = stats(s).finalPct.toFixed(6);
+    if(prevKey === null || key !== prevKey){ rank = i + 1; prevKey = key; }
+    ranks.set(s.id, rank);
+  });
+  return ranks;
+}
+
+/* =========================================================
+   STUDENT DIAGNOSTICS / ANALYSIS
+   ========================================================= */
+function analyzeStudent(s){
+  const st = stats(s);
+  const g  = gradeOf(st.finalPct);
+
+  // Comparison group = same class
+  const peers = state.students.filter(x => x.className === s.className);
+
+  // Per-quiz analysis with class comparison
+  const quizAnalysis = state.quizzes.map(q => {
+    const max = Number(q.max) || 0;
+    const myScore = s.scores ? s.scores[q.id] : null;
+    const myPct = (typeof myScore === 'number' && max > 0) ? (myScore / max) * 100 : null;
+
+    let sum = 0, count = 0;
+    peers.forEach(p => {
+      const v = p.scores ? p.scores[q.id] : null;
+      if(typeof v === 'number' && max > 0){
+        sum += (v / max) * 100;
+        count++;
+      }
+    });
+    const classPct = count > 0 ? sum / count : 0;
+    const diff = myPct !== null ? myPct - classPct : null;
+    const attempted = myPct !== null;
+
+    return { quiz: q, max, score: myScore, pct: myPct, classPct, diff, attempted };
+  });
+
+  // Class rank
+  const classSorted = peers.slice().sort((a, b) => {
+    const sa = stats(a), sb = stats(b);
+    if(sb.finalPct !== sa.finalPct) return sb.finalPct - sa.finalPct;
+    if(sb.total    !== sa.total)    return sb.total    - sa.total;
+    return a.name.localeCompare(b.name);
+  });
+  const classRank = classSorted.findIndex(x => x.id === s.id) + 1;
+
+  // Percentile within class (higher = better)
+  const percentile = peers.length > 1
+    ? ((peers.length - classRank) / (peers.length - 1)) * 100
+    : 100;
+
+  // Trend: compare first half vs second half of attempted quizzes
+  const attempted = quizAnalysis.filter(q => q.attempted);
+  let trend = 'stable', trendDelta = 0;
+  if(attempted.length >= 3){
+    const mid = Math.floor(attempted.length / 2);
+    const first  = attempted.slice(0, mid);
+    const second = attempted.slice(mid);
+    const avg1 = first.reduce((a, q) => a + q.pct, 0) / first.length;
+    const avg2 = second.reduce((a, q) => a + q.pct, 0) / second.length;
+    trendDelta = avg2 - avg1;
+    if(trendDelta > 5) trend = 'improving';
+    else if(trendDelta < -5) trend = 'declining';
+  }
+
+  // Strengths / weaknesses relative to class average
+  const withDiff = quizAnalysis.filter(q => q.diff !== null)
+    .slice().sort((a, b) => b.diff - a.diff);
+  const strengths  = withDiff.slice(0, 2).filter(q => q.diff >= 0);
+  const weaknesses = withDiff.slice(-2).reverse().filter(q => q.diff < 0);
+
+  // Bonus breakdown
+  const bonusBreakdown = state.bonusCats.map(b => ({
+    key: b.key, name: b.name, max: Number(b.max) || 0,
+    value: Number(s.bonus && s.bonus[b.key]) || 0
+  }));
+
+  // Missing quizzes
+  const missing = quizAnalysis.filter(q => !q.attempted);
+
+  return {
+    st, g, quizAnalysis, classRank, percentile, trend, trendDelta,
+    strengths, weaknesses, bonusBreakdown, missing,
+    classSize: peers.length,
+    bestQuiz: withDiff[0] || null,
+    worstQuiz: withDiff[withDiff.length - 1] || null
+  };
+}
+
+function buildInsights(a){
+  const list = [];
+  const name = a.st.name || 'This student';
+
+  // Overall level
+  if(a.st.finalPct >= 90)
+    list.push({ type:'good', ico:'🌟',
+      text:`Excellent overall performance at ${a.st.finalPct.toFixed(1)}% — top-tier achievement.` });
+  else if(a.st.finalPct >= 75)
+    list.push({ type:'good', ico:'✅',
+      text:`Good overall performance at ${a.st.finalPct.toFixed(1)}%. Focused work on weak areas could push into the top tier.` });
+  else if(a.st.finalPct >= 60)
+    list.push({ type:'warn', ico:'⚠️',
+      text:`Satisfactory performance at ${a.st.finalPct.toFixed(1)}%. Consistent practice will lift results.` });
+  else
+    list.push({ type:'bad', ico:'🚨',
+      text:`Performance at ${a.st.finalPct.toFixed(1)}% needs significant improvement — recommend additional support.` });
+
+  // Strengths
+  if(a.strengths.length){
+    const sNames = a.strengths.map(q =>
+      `"${q.quiz.name}" (+${q.diff.toFixed(1)}% vs class)`).join(', ');
+    list.push({ type:'good', ico:'💪', text:`Strongest area${a.strengths.length>1?'s':''}: ${sNames}.` });
+  }
+
+  // Weaknesses
+  if(a.weaknesses.length){
+    const wNames = a.weaknesses.map(q =>
+      `"${q.quiz.name}" (${q.diff.toFixed(1)}% vs class)`).join(', ');
+    list.push({ type:'warn', ico:'🎯', text:`Focus area${a.weaknesses.length>1?'s':''}: ${wNames}.` });
+  }
+
+  // Trend
+  if(a.trend === 'improving')
+    list.push({ type:'trend-up', ico:'📈',
+      text:`Improving trend — recent quizzes average ${a.trendDelta.toFixed(1)}% higher than earlier ones.` });
+  else if(a.trend === 'declining')
+    list.push({ type:'trend-down', ico:'📉',
+      text:`Declining trend — recent quizzes average ${Math.abs(a.trendDelta).toFixed(1)}% lower than earlier ones. Early support recommended.` });
+  else if(a.quizAnalysis.filter(q=>q.attempted).length >= 3)
+    list.push({ type:'trend-flat', ico:'➡️',
+      text:`Performance is steady across quizzes — no significant upward or downward trend.` });
+
+  // Missing
+  if(a.missing.length){
+    list.push({ type:'warn', ico:'📌',
+      text:`Missing work: ${a.missing.map(q => q.quiz.name).join(', ')} not attempted. Follow up on missing assessments.` });
+  }
+
+  // Bonus insight
+  const bonusPct = a.st.bonusMax > 0 ? (a.st.bonus / a.st.bonusMax) * 100 : 0;
+  if(state.includeBonus && a.st.bonusMax > 0){
+    if(bonusPct >= 80)
+      list.push({ type:'good', ico:'🎁',
+        text:`Excellent bonus contribution (${a.st.bonus}/${a.st.bonusMax}) — strong behaviour, homework and challenge engagement.` });
+    else if(bonusPct < 30 && a.st.bonus > 0)
+      list.push({ type:'info', ico:'🎁',
+        text:`Bonus marks contribute ${a.st.bonus}/${a.st.bonusMax} — more consistency here can boost the final score.` });
+    else if(a.st.bonus === 0)
+      list.push({ type:'info', ico:'🎁',
+        text:`No bonus marks recorded yet — Behaviour, Homework and Challenge categories are available.` });
+  } else if(!state.includeBonus && a.st.bonus > 0){
+    list.push({ type:'info', ico:'ℹ️',
+      text:`Bonus marks (${a.st.bonus}) are currently excluded from the ranking.` });
+  }
+
+  // Class context
+  list.push({ type:'info', ico:'🏫',
+    text:`Ranked #${a.classRank} of ${a.classSize} in ${a.st.name ? '' : ''}class ${a.className}, in the ${ordinal(Math.round(a.percentile))} percentile.` });
+
+  return list;
+}
+function ordinal(n){
+  const s = ['th','st','nd','rd'], v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+/* =========================================================
+   DIAGNOSTICS MODAL
+   ========================================================= */
+const diagModal = $('#diagModal');
+const diagHead  = $('#diagHead');
+const diagBody  = $('#diagBody');
+const diagFoot  = $('#diagFoot');
+
+function openDiagnostics(studentId){
+  const s = state.students.find(x => x.id === studentId);
+  if(!s) return;
+  const a = analyzeStudent(s);
+  const initial = (s.name.trim().charAt(0) || '?').toUpperCase();
+
+  /* Header */
+  diagHead.innerHTML = `
+    <div class="diag-avatar">${esc(initial)}</div>
+    <div class="diag-head-info">
+      <h2>${esc(s.name)}</h2>
+      <p>
+        Class ${esc(s.className)}
+        <span class="dot">·</span> Rank #${a.classRank} of ${a.classSize}
+        <span class="dot">·</span> Grade ${a.g.letter}
+      </p>
+    </div>
+    <button class="diag-close" id="diagCloseBtn" title="Close">✕</button>
+  `;
+
+  /* Body */
+  const trendIcon = a.trend === 'improving' ? '📈 Improving'
+                 : a.trend === 'declining' ? '📉 Declining'
+                 : '➡️ Steady';
+
+  diagBody.innerHTML = `
+    <div class="diag-section-title">Key Metrics</div>
+    <div class="diag-stats">
+      <div class="diag-stat">
+        <span class="k">Final Score</span>
+        <span class="v violet">${fmt(a.st.finalScore)}<small style="font-size:11px;color:#94a3b8">/${fmt(a.st.max)}</small></span>
+      </div>
+      <div class="diag-stat">
+        <span class="k">Final %</span>
+        <span class="v indigo">${a.st.finalPct.toFixed(1)}%</span>
+      </div>
+      <div class="diag-stat">
+        <span class="k">Quiz %</span>
+        <span class="v emerald">${a.st.quizPct.toFixed(1)}%</span>
+      </div>
+      <div class="diag-stat">
+        <span class="k">Bonus</span>
+        <span class="v" style="color:#0891b2">${fmt(a.st.bonus)}/${fmt(a.st.bonusMax)}</span>
+      </div>
+      <div class="diag-stat">
+        <span class="k">Class Rank</span>
+        <span class="v amber">#${a.classRank}</span>
+      </div>
+      <div class="diag-stat">
+        <span class="k">Percentile</span>
+        <span class="v rose">${a.percentile.toFixed(0)}%</span>
+      </div>
+      <div class="diag-stat">
+        <span class="k">Grade</span>
+        <span class="v">${a.g.letter}</span>
+      </div>
+      <div class="diag-stat">
+        <span class="k">Trend</span>
+        <span class="v" style="font-size:13px">${trendIcon}</span>
+      </div>
+    </div>
+
+    <div class="diag-section-title">Quiz Performance vs Class Average</div>
+    <div class="diag-quiz-list" id="diagQuizList"></div>
+
+    <div class="diag-section-title">Bonus Breakdown</div>
+    <div class="bonus-chips" id="diagBonusChips"></div>
+
+    <div class="diag-section-title">Analysis &amp; Recommendations</div>
+    <div class="insights" id="diagInsights"></div>
+  `;
+
+  // Quiz comparison rows
+  const ql = $('#diagQuizList');
+  ql.innerHTML = a.quizAnalysis.map(q => {
+    const myPct = q.pct;
+    const classPct = q.classPct;
+    const diff = q.diff;
+
+    const diffCls = !q.attempted ? 'neu'
+                  : diff > 2 ? 'pos'
+                  : diff < -2 ? 'neg' : 'neu';
+    const diffTxt = !q.attempted ? '—'
+                  : (diff >= 0 ? '+' : '') + diff.toFixed(1) + '%';
+
+    const mineWidth = myPct != null ? Math.max(0, Math.min(100, myPct)) : 0;
+    const classWidth = Math.max(0, Math.min(100, classPct));
+
+    return `
+      <div class="diag-quiz-row">
+        <div class="diag-q-name">
+          ${esc(q.quiz.name)}
+          <small>${q.attempted ? `${q.score}/${q.max}` : 'not attempted'}</small>
+        </div>
+        <div class="diag-bars">
+          <div class="diag-bar-line">
+            <span class="diag-bar-tag">You</span>
+            <div class="diag-bar-track">
+              <div class="diag-bar-fill mine" style="width:${mineWidth}%"></div>
+            </div>
+            <span class="diag-bar-val">${myPct != null ? myPct.toFixed(0) + '%' : '—'}</span>
+          </div>
+          <div class="diag-bar-line">
+            <span class="diag-bar-tag">Class</span>
+            <div class="diag-bar-track">
+              <div class="diag-bar-fill class" style="width:${classWidth}%"></div>
+            </div>
+            <span class="diag-bar-val">${classPct.toFixed(0)}%</span>
+          </div>
+        </div>
+        <div class="diag-diff ${diffCls}">${diffTxt}</div>
+      </div>
+    `;
+  }).join('') || '<div style="color:#94a3b8;font-size:12.5px">No quizzes defined.</div>';
+
+  // Bonus chips
+  const bc = $('#diagBonusChips');
+  bc.innerHTML = a.bonusBreakdown.map(b => `
+    <div class="bonus-chip">
+      <span class="bk">${esc(b.name)}</span>
+      <span class="bv">${fmt(b.value)}<small style="font-size:10px;color:#94a3b8"> / ${fmt(b.max)}</small></span>
+    </div>
+  `).join('') || '<div style="color:#94a3b8;font-size:12.5px">No bonus categories defined.</div>';
+
+  // Insights
+  const ins = $('#diagInsights');
+  ins.innerHTML = buildInsights(a).map(i =>
+    `<div class="insight ${i.type}">
+       <span class="ico">${i.ico}</span>
+       <span>${esc(i.text)}</span>
+     </div>`
+  ).join('');
+
+  /* Footer */
+  diagFoot.innerHTML = `
+    <div class="meta">
+      Report generated ${new Date().toLocaleString()}
+      · Comparison group: Class ${esc(s.className)}
+      ${state.includeBonus ? '' : '· Bonus excluded from ranking'}
+    </div>
+    <div class="btns">
+      <button class="btn ghost" id="diagCloseBtn2">Close</button>
+      <button class="btn primary" id="diagExportBtn">⬇ Export Report</button>
+    </div>
+  `;
+
+  // Wire buttons
+  $('#diagCloseBtn').onclick  = () => diagModal.close();
+  $('#diagCloseBtn2').onclick = () => diagModal.close();
+  $('#diagExportBtn').onclick = () => exportStudentDiagnostics(s.id);
+
+  diagModal.showModal();
+}
+
+/* =========================================================
+   DOM REFS (main)
+   ========================================================= */
+const tabsEl      = $('#tabs');
+const thead       = $('#thead');
+const tbody       = $('#tbody');
+const summaryEl   = $('#summary');
+const stageEl     = $('#stage');
+const searchInput = $('#search');
+const includeChk  = $('#includeBonus');
+const modal       = $('#modal');
+const modalTitle  = $('#modalTitle');
+const modalBody   = $('#modalBody');
+const modalForm   = $('#modalForm');
+
+/* =========================================================
+   RENDER: TABS
+   ========================================================= */
+function renderTabs(){
+  const items = [{ key:'all', label:'All Students' }]
+    .concat(state.classes.map(c => ({ key:c, label:c })));
+  tabsEl.innerHTML = items.map(t => `
+    <button class="tab ${state.view === t.key ? 'active' : ''}" data-view="${esc(t.key)}">
+      ${esc(t.label)}
+    </button>
+  `).join('') + `<button class="tab add" id="btnAddClass">+ Class</button>`;
+}
+
+/* =========================================================
+   RENDER: TABLE HEAD
+   ========================================================= */
+function renderHead(){
+  const showClass = state.view === 'all';
+  let h = '<tr>';
+  h += '<th class="col-rank">Rank</th>';
+  h += '<th class="col-name">Student</th>';
+  if(showClass) h += '<th class="col-class">Class</th>';
+
+  state.quizzes.forEach(q => {
+    h += `
+      <th class="col-quiz">
+        <div class="th-row">
+          <input class="th-name" data-quiz-name="${q.id}" value="${esc(q.name)}" title="Rename quiz">
+          <button class="icon-btn" data-del-quiz="${q.id}" title="Delete quiz">✕</button>
+        </div>
+        <div class="th-row th-sub">
+          <span>Max</span>
+          <input type="number" min="0" step="1" class="th-max"
+                 data-quiz-max="${q.id}" value="${Number(q.max) || 0}">
+          <label class="th-chk" title="Counts toward the total">
+            <input type="checkbox" data-quiz-active="${q.id}" ${q.active !== false ? 'checked' : ''}>
+          </label>
+        </div>
+      </th>`;
+  });
+
+  h += '<th class="col-total">Quiz Total</th>';
+  h += '<th class="col-pct">Quiz %</th>';
+
+  state.bonusCats.forEach(b => {
+    h += `
+      <th class="col-bonus">
+        <div class="th-row">
+          <input class="th-name" data-bonus-name="${b.key}" value="${esc(b.name)}" title="Rename category">
+        </div>
+        <div class="th-row th-sub">
+          <span>Max</span>
+          <input type="number" min="0" step="1" class="th-max"
+                 data-bonus-max="${b.key}" value="${Number(b.max) || 0}">
+        </div>
+      </th>`;
+  });
+
+  h += '<th class="col-bonus-total">Bonus</th>';
+  h += '<th class="col-final">Final Score</th>';
+  h += '<th class="col-finalpct">Final %</th>';
+  h += '<th class="col-grade">Grade</th>';
+  h += '<th class="col-actions">Actions</th>';
+  h += '</tr>';
+  thead.innerHTML = h;
+}
+
+/* =========================================================
+   RENDER: TABLE BODY
+   ========================================================= */
+function rowHTML(s, rank, showClass){
+  const st = stats(s);
+  const g  = gradeOf(st.finalPct);
+
+  let h = `<tr data-id="${s.id}">`;
+  h += `<td class="col-rank"><span class="rank-badge ${rankClass(rank)}">${rank}</span></td>`;
+  h += `<td class="col-name">
+          <input class="cell-input name-input link" data-field="name"
+                 value="${esc(s.name)}" data-open-diag="${s.id}"
+                 title="Click to open diagnostics">
+        </td>`;
+
+  if(showClass){
+    h += `<td class="col-class">
+            <select class="cell-select" data-field="class">
+              ${state.classes.map(c =>
+                `<option value="${esc(c)}" ${c === s.className ? 'selected' : ''}>${esc(c)}</option>`
+              ).join('')}
+            </select>
+          </td>`;
+  }
+
+  state.quizzes.forEach(q => {
+    const v = s.scores ? s.scores[q.id] : null;
+    const inactive = q.active === false ? ' inactive' : '';
+    const cls = scoreClass(v, q.max);
+    h += `<td class="col-quiz${inactive}">
+            <input type="number" class="cell-input score-input ${cls}"
+                   data-field="score" data-quiz="${q.id}"
+                   min="0" step="0.5"
+                   value="${v === null || v === undefined ? '' : v}"
+                   placeholder="–">
+          </td>`;
+  });
+
+  h += `<td class="col-total derived cell-quiztotal">${fmt(st.total)}/${fmt(st.max)}</td>`;
+
+  h += `<td class="col-pct derived">
+          <div class="pct-wrap">
+            <div class="pct-bar"><div class="pct-fill quiz" style="width:${Math.min(100, st.quizPct)}%"></div></div>
+            <span class="pct-label cell-quizpct">${st.quizPct.toFixed(1)}%</span>
+          </div>
+        </td>`;
+
+  state.bonusCats.forEach(b => {
+    const v = s.bonus ? s.bonus[b.key] : 0;
+    h += `<td class="col-bonus">
+            <input type="number" class="cell-input bonus-input"
+                   data-field="bonus" data-bonus="${b.key}"
+                   min="0" step="0.5"
+                   value="${v || ''}" placeholder="0">
+          </td>`;
+  });
+
+  h += `<td class="col-bonus-total derived cell-bonustotal">${fmt(st.bonus)}</td>`;
+  h += `<td class="col-final derived cell-finalscore">${fmt(st.finalScore)}</td>`;
+  h += `<td class="col-finalpct derived">
+          <div class="pct-wrap">
+            <div class="pct-bar"><div class="pct-fill" style="width:${Math.min(100, st.finalPct)}%"></div></div>
+            <span class="pct-label cell-finalpct">${st.finalPct.toFixed(1)}%</span>
+          </div>
+        </td>`;
+  h += `<td class="col-grade derived">
+          <span class="grade-badge ${g.cls}">${g.letter}</span>
+        </td>`;
+  h += `<td class="col-actions">
+          <button class="icon-btn diag" data-diag="${s.id}" title="View diagnostics">📊</button>
+          <button class="icon-btn" data-del-student="${s.id}" title="Remove student">✕</button>
+        </td>`;
+  h += '</tr>';
+  return h;
+}
+
+function renderBody(){
+  const list  = getFilteredSorted();
+  const ranks = assignRanks(list);
+  const showClass = state.view === 'all';
+  const colCount = 6 + state.quizzes.length + state.bonusCats.length + (showClass ? 1 : 0);
+
+  if(!list.length){
+    tbody.innerHTML = `<tr><td class="empty" colspan="${colCount}">No students to display.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(s => rowHTML(s, ranks.get(s.id), showClass)).join('');
+}
+
+/* =========================================================
+   RENDER: PODIUM / STAGE
+   ========================================================= */
+function renderPodium(){
+  const list = getFilteredSorted();
+  const top  = list.slice(0, 3);
+
+  if(!top.length){
+    stageEl.innerHTML = `<div class="stage-header">
+        <span class="stage-title">🏆 Top Performers</span>
+      </div><div class="stage-empty">No students to display</div>`;
+    return;
+  }
+
+  const order = [1, 0, 2];
+  const subLabel = state.view === 'all' ? 'All classes' : 'Class ' + state.view;
+
+  stageEl.innerHTML = `
+    <div class="stage-header">
+      <span class="stage-title">🏆 Top Performers</span>
+      <span class="stage-sub">${esc(subLabel)}</span>
+    </div>
+    <div class="podium">
+      ${order.map(idx => {
+        const place = idx + 1;
+        const s = top[idx];
+        const spotCls = `spot-${place}`;
+
+        if(!s){
+          return `
+            <div class="podium-spot ${spotCls} podium-empty">
+              <div class="podium-crown">${place === 1 ? '👑' : place === 2 ? '🥈' : '🥉'}</div>
+              <div class="podium-avatar">?</div>
+              <div class="podium-name">—</div>
+              <div class="podium-score">—</div>
+              <div class="podium-bar"><span class="podium-rank">${place}</span></div>
+            </div>`;
+        }
+
+        const st = stats(s);
+        const initial = (s.name.trim().charAt(0) || '?').toUpperCase();
+        const crown = place === 1 ? '👑' : place === 2 ? '🥈' : '🥉';
+
+        return `
+          <div class="podium-spot ${spotCls}" data-diag="${s.id}" title="View diagnostics">
+            <div class="podium-crown">${crown}</div>
+            <div class="podium-avatar">${esc(initial)}</div>
+            <div class="podium-name" title="${esc(s.name)}">${esc(s.name)}</div>
+            <div class="podium-score">${st.finalPct.toFixed(1)}%</div>
+            <div class="podium-bar"><span class="podium-rank">${place}</span></div>
+          </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+/* =========================================================
+   RENDER: SUMMARY CARDS
+   ========================================================= */
+function renderSummary(){
+  const list = getVisibleStudents();
+  if(!list.length){ summaryEl.innerHTML = ''; return; }
+
+  let sumQuiz = 0, sumFinal = 0;
+  list.forEach(s => {
+    const st = stats(s);
+    sumQuiz  += st.quizPct;
+    sumFinal += st.finalPct;
+  });
+
+  const sorted = getFilteredSorted();
+  const top = sorted[0];
+
+  summaryEl.innerHTML = `
+    <div class="stat s-indigo">
+      <div class="stat-icon">👥</div>
+      <div class="stat-body">
+        <span class="stat-label">Students</span>
+        <span class="stat-value">${list.length}</span>
+      </div>
+    </div>
+    <div class="stat s-emerald">
+      <div class="stat-icon">📊</div>
+      <div class="stat-body">
+        <span class="stat-label">Avg Quiz %</span>
+        <span class="stat-value">${(sumQuiz / list.length).toFixed(1)}%</span>
+      </div>
+    </div>
+    <div class="stat s-violet">
+      <div class="stat-icon">🎯</div>
+      <div class="stat-body">
+        <span class="stat-label">Avg Final %</span>
+        <span class="stat-value">${(sumFinal / list.length).toFixed(1)}%</span>
+      </div>
+    </div>
+    <div class="stat s-amber">
+      <div class="stat-icon">🥇</div>
+      <div class="stat-body">
+        <span class="stat-label">Top Student</span>
+        <span class="stat-value">${top ? esc(top.name) : '—'}</span>
+      </div>
+    </div>
+  `;
+}
+
+/* =========================================================
+   LIVE DERIVED UPDATE
+   ========================================================= */
+function updateDerived(){
+  const list  = getFilteredSorted();
+  const ranks = assignRanks(list);
+
+  list.forEach(s => {
+    const tr = tbody.querySelector(`tr[data-id="${s.id}"]`);
+    if(!tr) return;
+
+    const st = stats(s);
+    const g  = gradeOf(st.finalPct);
+
+    const setText = (cls, txt) => {
+      const el = tr.querySelector('.' + cls);
+      if(el) el.textContent = txt;
+    };
+    setText('cell-quiztotal',  `${fmt(st.total)}/${fmt(st.max)}`);
+    setText('cell-quizpct',    st.quizPct.toFixed(1) + '%');
+    setText('cell-bonustotal', fmt(st.bonus));
+    setText('cell-finalscore', fmt(st.finalScore));
+    setText('cell-finalpct',   st.finalPct.toFixed(1) + '%');
+
+    const qFill = tr.querySelector('.col-pct .pct-fill');
+    if(qFill) qFill.style.width = Math.min(100, st.quizPct) + '%';
+    const fFill = tr.querySelector('.col-finalpct .pct-fill');
+    if(fFill) fFill.style.width = Math.min(100, st.finalPct) + '%';
+
+    const gb = tr.querySelector('.col-grade .grade-badge');
+    if(gb){ gb.className = 'grade-badge ' + g.cls; gb.textContent = g.letter; }
+
+    const badge = tr.querySelector('.rank-badge');
+    if(badge){
+      const r = ranks.get(s.id);
+      badge.textContent = r;
+      badge.className = 'rank-badge ' + rankClass(r);
+    }
+  });
+
+  renderPodium();
+  renderSummary();
+}
+
+/* =========================================================
+   MAIN RENDER
+   ========================================================= */
+function render(){
+  renderTabs();
+  renderHead();
+  renderBody();
+  renderPodium();
+  renderSummary();
+
+  document.querySelector('.table-wrap')
+    .classList.toggle('bonus-off', !state.includeBonus);
+
+  searchInput.value = state.search;
+  includeChk.checked = state.includeBonus;
+}
+
+/* =========================================================
+   ADD/EDIT MODAL
+   ========================================================= */
+let modalSubmitHandler = null;
+function openModal(title, fields, onSubmit){
+  modalTitle.textContent = title;
+  modalBody.innerHTML = fields.map(f => {
+    if(f.type === 'select'){
+      return `<label class="field"><span>${esc(f.label)}</span>
+        <select name="${esc(f.name)}">
+          ${f.options.map(o =>
+            `<option value="${esc(o.value)}" ${o.value === f.value ? 'selected' : ''}>${esc(o.label)}</option>`
+          ).join('')}
+        </select></label>`;
+    }
+    return `<label class="field"><span>${esc(f.label)}</span>
+      <input name="${esc(f.name)}" type="${esc(f.type)}"
+             value="${esc(f.value ?? '')}"
+             ${f.min != null ? `min="${f.min}"` : ''}
+             ${f.max != null ? `max="${f.max}"` : ''}
+             ${f.step != null ? `step="${f.step}"` : ''}
+             ${f.required ? 'required' : ''}></label>`;
+  }).join('');
+  modalSubmitHandler = onSubmit;
+  modal.showModal();
+  const first = modalBody.querySelector('input,select');
+  if(first) setTimeout(() => first.focus(), 40);
+}
+modalForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const data = {};
+  new FormData(modalForm).forEach((v, k) => { data[k] = v; });
+  const handler = modalSubmitHandler;
+  modalSubmitHandler = null;
+  modal.close();
+  if(handler) handler(data);
+});
+$('#modalCancel').addEventListener('click', () => {
+  modalSubmitHandler = null;
+  modal.close();
+});
+
+/* =========================================================
+   EVENTS — TABS
+   ========================================================= */
+tabsEl.addEventListener('click', e => {
+  const tab = e.target.closest('.tab');
+  if(!tab) return;
+  if(tab.dataset.view){
+    state.view = tab.dataset.view;
+    saveState();
+    render();
+    return;
+  }
+  if(tab.id === 'btnAddClass'){
+    openModal('Add Class', [
+      { label:'Class name', name:'name', type:'text', value:'', required:true }
+    ], d => {
+      const name = (d.name || '').trim();
+      if(!name || state.classes.includes(name)) return;
+      state.classes.push(name);
+      state.view = name;
+      saveState();
+      render();
+    });
+  }
+});
+
+/* =========================================================
+   EVENTS — TOOLBAR
+   ========================================================= */
+searchInput.addEventListener('input', e => {
+  state.search = e.target.value;
+  renderBody();
+  renderPodium();
+  renderSummary();
+});
+includeChk.addEventListener('change', e => {
+  state.includeBonus = e.target.checked;
+  saveState();
+  render();
+});
+
+$('#btnAddStudent').addEventListener('click', () => {
+  openModal('Add Student', [
+    { label:'Student name', name:'name', type:'text', value:'', required:true },
+    {
+      label:'Class', name:'className', type:'select',
+      options: state.classes.map(c => ({ value:c, label:c })),
+      value: state.view !== 'all' ? state.view : (state.classes[0] || '')
+    }
+  ], d => {
+    const name = (d.name || '').trim();
+    if(!name) return;
+    const scores = {}, bonus = {};
+    state.quizzes.forEach(q => { scores[q.id] = null; });
+    state.bonusCats.forEach(b => { bonus[b.key] = 0; });
+    state.students.push({
+      id: uid(), name, className: d.className || state.classes[0], scores, bonus
+    });
+    saveState();
+    render();
+  });
+});
+
+$('#btnAddQuiz').addEventListener('click', () => {
+  openModal('Add Quiz', [
+    { label:'Quiz name', name:'name', type:'text',
+      value:`Quiz ${state.quizzes.length + 1}`, required:true },
+    { label:'Maximum score', name:'max', type:'number', value:10, min:1, step:1, required:true }
+  ], d => {
+    const name = (d.name || '').trim() || `Quiz ${state.quizzes.length + 1}`;
+    const max  = Math.max(1, Number(d.max) || 10);
+    state.quizzes.push({ id: uid(), name, max, active:true });
+    saveState();
+    render();
+  });
+});
+
+$('#btnReset').addEventListener('click', () => {
+  if(!confirm('Reset everything back to the original 6A / 6C data?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem('studentRanker.v2');
+  localStorage.removeItem('studentRanker.v1');
+  state = buildDefaultState();
+  render();
+});
+
+/* =========================================================
+   EVENTS — HEADER INPUTS
+   ========================================================= */
+thead.addEventListener('input', e => {
+  const t = e.target;
+  if(t.dataset.quizName !== undefined){
+    const q = state.quizzes.find(x => x.id === t.dataset.quizName);
+    if(q) q.name = t.value;
+    saveState();
+  } else if(t.dataset.bonusName !== undefined){
+    const b = state.bonusCats.find(x => x.key === t.dataset.bonusName);
+    if(b) b.name = t.value;
+    saveState();
+  }
+});
+thead.addEventListener('change', e => {
+  const t = e.target;
+  if(t.dataset.quizMax !== undefined){
+    const q = state.quizzes.find(x => x.id === t.dataset.quizMax);
+    if(q) q.max = Math.max(0, Number(t.value) || 0);
+    saveState(); render();
+  } else if(t.dataset.quizActive !== undefined){
+    const q = state.quizzes.find(x => x.id === t.dataset.quizActive);
+    if(q) q.active = t.checked;
+    saveState(); render();
+  } else if(t.dataset.bonusMax !== undefined){
+    const b = state.bonusCats.find(x => x.key === t.dataset.bonusMax);
+    if(b) b.max = Math.max(0, Number(t.value) || 0);
+    saveState(); render();
+  }
+});
+thead.addEventListener('click', e => {
+  const btn = e.target.closest('[data-del-quiz]');
+  if(!btn) return;
+  const q = state.quizzes.find(x => x.id === btn.dataset.delQuiz);
+  if(!q) return;
+  if(!confirm(`Delete "${q.name}"?`)) return;
+  state.quizzes = state.quizzes.filter(x => x.id !== q.id);
+  state.students.forEach(s => { if(s.scores) delete s.scores[q.id]; });
+  saveState();
+  render();
+});
+
+/* =========================================================
+   EVENTS — BODY
+   ========================================================= */
+tbody.addEventListener('input', e => {
+  const t  = e.target;
+  const tr = t.closest('tr');
+  if(!tr) return;
+  const s = state.students.find(x => x.id === tr.dataset.id);
+  if(!s) return;
+
+  if(t.dataset.field === 'score'){
+    const raw = t.value.trim();
+    s.scores[t.dataset.quiz] = raw === '' ? null : Number(raw);
+    const q = state.quizzes.find(x => x.id === t.dataset.quiz);
+    t.classList.remove('s-high','s-mid','s-low');
+    if(q) t.classList.add(scoreClass(s.scores[t.dataset.quiz], q.max));
+    updateDerived();
+    saveState();
+  } else if(t.dataset.field === 'bonus'){
+    const raw = t.value.trim();
+    s.bonus[t.dataset.bonus] = raw === '' ? 0 : Number(raw);
+    updateDerived();
+    saveState();
+  } else if(t.dataset.field === 'name'){
+    s.name = t.value;
+    saveState();
+  }
+});
+tbody.addEventListener('change', e => {
+  const t  = e.target;
+  const tr = t.closest('tr');
+  if(!tr) return;
+  const s = state.students.find(x => x.id === tr.dataset.id);
+  if(!s) return;
+  if(t.dataset.field === 'score' || t.dataset.field === 'bonus'){
+    render();
+  } else if(t.dataset.field === 'class'){
+    s.className = t.value;
+    saveState();
+    render();
+  }
+});
+tbody.addEventListener('click', e => {
+  // Diagnostics via name or icon button
+  const diagName = e.target.closest('[data-open-diag]');
+  if(diagName && !e.target.closest('[data-del-student]')){
+    openDiagnostics(diagName.dataset.openDiag);
+    return;
+  }
+  const diagBtn = e.target.closest('[data-diag]');
+  if(diagBtn){
+    openDiagnostics(diagBtn.dataset.diag);
+    return;
+  }
+  const btn = e.target.closest('[data-del-student]');
+  if(!btn) return;
+  const s = state.students.find(x => x.id === btn.dataset.delStudent);
+  if(!s) return;
+  if(!confirm(`Remove "${s.name}" from the ranking?`)) return;
+  state.students = state.students.filter(x => x.id !== s.id);
+  saveState();
+  render();
+});
+
+/* Podium click opens diagnostics */
+stageEl.addEventListener('click', e => {
+  const spot = e.target.closest('[data-diag]');
+  if(spot) openDiagnostics(spot.dataset.diag);
+});
+
+/* =========================================================
+   EXPORT MENU
+   ========================================================= */
+const exportMenu = $('#exportMenu');
+$('#btnExportMenu').addEventListener('click', e => {
+  e.stopPropagation();
+  exportMenu.classList.toggle('open');
+});
+document.addEventListener('click', e => {
+  if(!e.target.closest('.export-wrap')) exportMenu.classList.remove('open');
+});
+exportMenu.addEventListener('click', e => {
+  const btn = e.target.closest('[data-export]');
+  if(!btn) return;
+  exportMenu.classList.remove('open');
+  const kind = btn.dataset.export;
+  if(kind === 'csv')            exportCSV();
+  else if(kind === 'rankings')  exportRankingsXLS();
+  else if(kind === 'diagnostics') exportAllDiagnosticsXLS();
+  else if(kind === 'summary')   exportSummaryXLS();
+  else if(kind === 'podium')    exportPodiumXLS();
+  else if(kind === 'complete')  exportCompleteWorkbook();
+});
+
+/* ---------- Generic multi-sheet XLS writer ---------- */
+function exportExcelWorkbook(filename, sheets){
+  // sheets: [{ name, headers, rows }]
+  const sheetXml = sheets.map(s => `
+    <table>
+      <thead>
+        <tr>${s.headers.map(h => `<th>${esc(h)}</th>`).join('')}</tr>
+      </thead>
+      <tbody>
+        ${s.rows.map(r =>
+          `<tr>${r.map(c => `<td>${esc(c ?? '')}</td>`).join('')}</tr>`
+        ).join('')}
+      </tbody>
+    </table>
+  `).join('');
+
+  const workbookXml = `
+    <xml>
+      <x:ExcelWorkbook>
+        <x:ExcelWorksheets>
+          ${sheets.map(s => `
+            <x:ExcelWorksheet>
+              <x:Name>${esc(s.name).slice(0,31)}</x:Name>
+              <x:WorksheetOptions>
+                <x:DisplayGridlines/>
+                <x:FreezePanes/>
+                <x:SplitHorizontal>1</x:SplitHorizontal>
+                <x:TopRowBottomPane>1</x:TopRowBottomPane>
+                <x:ActivePane>2</x:ActivePane>
+              </x:WorksheetOptions>
+            </x:ExcelWorksheet>`).join('')}
+        </x:ExcelWorksheets>
+      </x:ExcelWorkbook>
+    </xml>
+  `;
+
+  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:x="urn:schemas-microsoft-com:office:excel"
+      xmlns="http://www.w3.org/TR/REC-html40">
+    <head>
+      <meta charset="UTF-8">
+      <!--[if gte mso 9]>${workbookXml}<![endif]-->
+      <style>
+        table{border-collapse:collapse;font-family:Calibri,Arial,sans-serif;font-size:11pt}
+        th{background:#6366f1;color:#fff;font-weight:700;padding:6px 8px;
+           border:1px solid #4f46e5;text-align:center}
+        td{padding:5px 8px;border:1px solid #e2e8f0;text-align:center}
+        td:first-child{text-align:left}
+        tr:nth-child(even) td{background:#f8fafc}
+      </style>
+    </head>
+    <body>${sheetXml}</body>
+  </html>`;
+
+  const blob = new Blob(['\ufeff' + html], { type:'application/vnd.ms-excel;charset=utf-8' });
+  downloadBlob(blob, filename);
+}
+
+function downloadBlob(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 200);
+}
+function stamp(){
+  return new Date().toISOString().slice(0,10);
+}
+function viewLabel(){
+  return state.view === 'all' ? 'All' : state.view;
+}
+
+/* ---------- Sheet builders ---------- */
+function buildRankingsSheet(){
+  const list  = getFilteredSorted();
+  const ranks = assignRanks(list);
+  const headers = ['Rank', 'Student', 'Class'];
+  state.quizzes.forEach(q => headers.push(`${q.name} (/${q.max})`));
+  headers.push('Quiz Total', 'Quiz Max', 'Quiz %');
+  state.bonusCats.forEach(b => headers.push(`${b.name} (/${b.max})`));
+  headers.push('Bonus Total', 'Final Score', 'Final %', 'Grade');
+
+  const rows = list.map(s => {
+    const st = stats(s);
+    const g  = gradeOf(st.finalPct);
+    const r = [ranks.get(s.id), s.name, s.className];
+    state.quizzes.forEach(q => r.push(s.scores[q.id] ?? ''));
+    r.push(st.total, st.max, st.quizPct.toFixed(1));
+    state.bonusCats.forEach(b => r.push(s.bonus[b.key] ?? 0));
+    r.push(st.bonus, st.finalScore, st.finalPct.toFixed(1), g.letter);
+    return r;
+  });
+
+  return { name:'Rankings', headers, rows };
+}
+
+function buildSummarySheet(){
+  // Per-class summary + overall
+  const groups = [{ name:'All Students', list: state.students }];
+  state.classes.forEach(c => {
+    groups.push({ name:'Class ' + c, list: state.students.filter(s => s.className === c) });
+  });
+
+  const headers = ['Group', 'Students', 'Avg Quiz %', 'Avg Final %',
+                   'Highest Final %', 'Lowest Final %', 'Top Student', 'Top Final %',
+                   'Avg Bonus'];
+  const rows = groups.map(g => {
+    const l = g.list;
+    if(!l.length) return [g.name, 0, 0, 0, 0, 0, '—', 0, 0];
+    let sumQ = 0, sumF = 0, sumB = 0;
+    let high = -Infinity, low = Infinity, topName = '—', topPct = 0;
+    l.forEach(s => {
+      const st = stats(s);
+      sumQ += st.quizPct;
+      sumF += st.finalPct;
+      sumB += st.bonus;
+      if(st.finalPct > high){ high = st.finalPct; topName = s.name; topPct = st.finalPct; }
+      if(st.finalPct < low) low = st.finalPct;
+    });
+    return [
+      g.name, l.length,
+      (sumQ / l.length).toFixed(1),
+      (sumF / l.length).toFixed(1),
+      high.toFixed(1), low.toFixed(1),
+      topName, topPct.toFixed(1),
+      (sumB / l.length).toFixed(2)
+    ];
+  });
+
+  // Extra sheet-ish: per-quiz class averages
+  return { name:'Summary', headers, rows };
+}
+
+function buildQuizAveragesSheet(){
+  const groups = [{ name:'All Students', list: state.students }];
+  state.classes.forEach(c => {
+    groups.push({ name:'Class ' + c, list: state.students.filter(s => s.className === c) });
+  });
+
+  const headers = ['Group'].concat(state.quizzes.map(q => `${q.name} Avg %`))
+                            .concat(['Avg Quiz %']);
+  const rows = groups.map(g => {
+    const l = g.list;
+    if(!l.length) return [g.name].concat(state.quizzes.map(() => '0.0')).concat(['0.0']);
+    const avgs = state.quizzes.map(q => {
+      const max = Number(q.max) || 0;
+      let sum = 0, count = 0;
+      l.forEach(s => {
+        const v = s.scores ? s.scores[q.id] : null;
+        if(typeof v === 'number' && max > 0){ sum += (v / max) * 100; count++; }
+      });
+      return count > 0 ? (sum / count).toFixed(1) : '0.0';
+    });
+    const overall = avgs.length
+      ? (avgs.reduce((a, v) => a + Number(v), 0) / avgs.length).toFixed(1)
+      : '0.0';
+    return [g.name].concat(avgs).concat([overall]);
+  });
+
+  return { name:'Quiz Averages', headers, rows };
+}
+
+function buildPodiumSheet(){
+  const list  = getFilteredSorted();
+  const ranks = assignRanks(list);
+  const headers = ['Place', 'Student', 'Class', 'Final Score', 'Final %', 'Grade', 'Rank'];
+  const rows = list.slice(0, 10).map((s, i) => {
+    const st = stats(s);
+    const g  = gradeOf(st.finalPct);
+    return [i + 1, s.name, s.className, fmt(st.finalScore),
+            st.finalPct.toFixed(1), g.letter, ranks.get(s.id)];
+  });
+  return { name:'Top Performers', headers, rows };
+}
+
+function buildDiagnosticsSheet(){
+  const list  = getFilteredSorted();
+  const ranks = assignRanks(list);
+
+  const headers = [
+    'Rank', 'Student', 'Class',
+    'Quiz Total', 'Quiz Max', 'Quiz %',
+    'Bonus', 'Bonus Max',
+    'Final Score', 'Final %', 'Grade',
+    'Class Rank', 'Percentile',
+    'Trend', 'Trend Δ (%)',
+    'Best Quiz', 'Best Δ vs Class',
+    'Weakest Quiz', 'Weakest Δ vs Class',
+    'Missing Quizzes',
+    'Behaviour', 'Homework', 'Challenge',
+    'Recommendation'
+  ];
+
+  const rows = list.map(s => {
+    const a = analyzeStudent(s);
+    const st = a.st;
+    const g  = a.g;
+
+    const best = a.bestQuiz;
+    const worst = a.worstQuiz;
+
+    const behaviour = s.bonus.behaviour || 0;
+    const homework  = s.bonus.homework  || 0;
+    const challenge = s.bonus.challenge || 0;
+
+    let rec = '';
+    if(st.finalPct >= 90) rec = 'Excellent — maintain level, consider peer mentoring.';
+    else if(st.finalPct >= 75) rec = 'Good — focus on weaker topics to reach top tier.';
+    else if(st.finalPct >= 60) rec = 'Satisfactory — targeted practice will lift results.';
+    else rec = 'Needs support — recommend intervention and regular practice.';
+    if(a.trend === 'declining') rec += ' Declining trend — early intervention.';
+    else if(a.trend === 'improving') rec += ' Improving trend — encourage effort.';
+    if(a.missing.length) rec += ` Missing: ${a.missing.map(q=>q.quiz.name).join(', ')}.`;
+
+    return [
+      ranks.get(s.id), s.name, s.className,
+      fmt(st.total), fmt(st.max), st.quizPct.toFixed(1),
+      fmt(st.bonus), fmt(st.bonusMax),
+      fmt(st.finalScore), st.finalPct.toFixed(1), g.letter,
+      a.classRank, a.percentile.toFixed(0) + '%',
+      a.trend, a.trendDelta.toFixed(1),
+      best ? best.quiz.name : '—',
+      best ? ((best.diff>=0?'+':'') + best.diff.toFixed(1) + '%') : '—',
+      worst ? worst.quiz.name : '—',
+      worst ? ((worst.diff>=0?'+':'') + worst.diff.toFixed(1) + '%') : '—',
+      a.missing.length ? a.missing.map(q=>q.quiz.name).join(', ') : 'None',
+      behaviour, homework, challenge,
+      rec
+    ];
+  });
+
+  return { name:'Diagnostics', headers, rows };
+}
+
+/* ---------- Export actions ---------- */
+function exportCSV(){
+  const sheet = buildRankingsSheet();
+  const csv = '\ufeff' + [sheet.headers, ...sheet.rows].map(row =>
+    row.map(cell => {
+      const str = String(cell ?? '');
+      return /[",\n\r]/.test(str) ? '"' + str.replace(/"/g, '""') + '"' : str;
+    }).join(',')
+  ).join('\r\n');
+
+  downloadBlob(new Blob([csv], { type:'text/csv;charset=utf-8;' }),
+    `rankings_${viewLabel()}_${stamp()}.csv`);
+}
+
+function exportRankingsXLS(){
+  exportExcelWorkbook(
+    `Rankings_${viewLabel()}_${stamp()}.xls`,
+    [buildRankingsSheet(), buildQuizAveragesSheet()]
+  );
+}
+
+function exportAllDiagnosticsXLS(){
+  exportExcelWorkbook(
+    `Diagnostics_${viewLabel()}_${stamp()}.xls`,
+    [buildDiagnosticsSheet()]
+  );
+}
+
+function exportSummaryXLS(){
+  exportExcelWorkbook(
+    `Summary_${viewLabel()}_${stamp()}.xls`,
+    [buildSummarySheet(), buildQuizAveragesSheet()]
+  );
+}
+
+function exportPodiumXLS(){
+  exportExcelWorkbook(
+    `TopPerformers_${viewLabel()}_${stamp()}.xls`,
+    [buildPodiumSheet()]
+  );
+}
+
+function exportCompleteWorkbook(){
+  exportExcelWorkbook(
+    `StudentReport_${viewLabel()}_${stamp()}.xls`,
+    [
+      buildRankingsSheet(),
+      buildPodiumSheet(),
+      buildSummarySheet(),
+      buildQuizAveragesSheet(),
+      buildDiagnosticsSheet(),
+    ]
+  );
+}
+
+/* ---------- Single-student diagnostic export ---------- */
+function exportStudentDiagnostics(studentId){
+  const s = state.students.find(x => x.id === studentId);
+  if(!s) return;
+  const a = analyzeStudent(s);
+  const st = a.st;
+
+  /* Sheet 1: Overview */
+  const overviewHeaders = ['Field', 'Value'];
+  const overviewRows = [
+    ['Student', s.name],
+    ['Class', s.className],
+    ['Class Rank', `#${a.classRank} of ${a.classSize}`],
+    ['Percentile', a.percentile.toFixed(0) + '%'],
+    ['Quiz Total', `${fmt(st.total)} / ${fmt(st.max)}`],
+    ['Quiz %', st.quizPct.toFixed(1) + '%'],
+    ['Bonus Total', `${fmt(st.bonus)} / ${fmt(st.bonusMax)}`],
+    ['Final Score', fmt(st.finalScore)],
+    ['Final %', st.finalPct.toFixed(1) + '%'],
+    ['Grade', a.g.letter],
+    ['Trend', a.trend + ' (' + a.trendDelta.toFixed(1) + '%)'],
+    ['Missing Quizzes', a.missing.length ? a.missing.map(q=>q.quiz.name).join(', ') : 'None'],
+    ['Report generated', new Date().toLocaleString()]
+  ];
+
+  /* Sheet 2: Quiz comparison */
+  const quizHeaders = ['Quiz', 'Max', 'Score', 'Student %', 'Class Avg %', 'Difference', 'Status'];
+  const quizRows = a.quizAnalysis.map(q => {
+    const diff = q.diff;
+    const diffTxt = diff == null ? '—'
+                  : (diff >= 0 ? '+' : '') + diff.toFixed(1) + '%';
+    const status = !q.attempted ? 'Not attempted'
+                 : diff > 2 ? 'Above class'
+                 : diff < -2 ? 'Below class' : 'At class level';
+    return [
+      q.quiz.name, q.max,
+      q.attempted ? q.score : '—',
+      q.pct != null ? q.pct.toFixed(1) + '%' : '—',
+      q.classPct.toFixed(1) + '%',
+      diffTxt, status
+    ];
+  });
+
+  /* Sheet 3: Bonus */
+  const bonusHeaders = ['Category', 'Score', 'Max', 'Percentage'];
+  const bonusRows = a.bonusBreakdown.map(b => [
+    b.name, b.value, b.max,
+    b.max > 0 ? ((b.value / b.max) * 100).toFixed(0) + '%' : '—'
+  ]);
+
+  /* Sheet 4: Insights */
+  const insightHeaders = ['Type', 'Insight'];
+  const insightRows = buildInsights(a).map(i => [i.type, i.text]);
+
+  exportExcelWorkbook(
+    `Diagnostic_${s.name.replace(/[^\w]+/g,'_')}_${stamp()}.xls`,
+    [
+      { name:'Overview', headers: overviewHeaders, rows: overviewRows },
+      { name:'Quiz Analysis', headers: quizHeaders, rows: quizRows },
+      { name:'Bonus', headers: bonusHeaders, rows: bonusRows },
+      { name:'Insights', headers: insightHeaders, rows: insightRows }
+    ]
+  );
+}
+
+/* =========================================================
+   GO
+   ========================================================= */
+render();
+</script>
+</body>
+</html>
